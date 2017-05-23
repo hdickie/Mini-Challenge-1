@@ -1,0 +1,78 @@
+---
+title: "VAST"
+author: "Hume Dickie"
+date: "May 22, 2017"
+output: html_document
+---
+
+I tried to implement pagerank myself but it didn't work. Here's what did that did not produce the correct result:
+1. divide each column by the sum of that column (making it stochastic)
+2. Find the eigenvectors and eigenvalues
+3. If the dominant eigenvalue is unique, then the first eigenvector is the pagerank vector such that:
+  i) the magnitude of each entry represents place in rank hierarchy (the exact value will be a gross decimal but when you put them all in order and then number them 1 to whatever you have performed the rank)
+  
+Any ideas where I went wrong?
+
+```{r pageRank}
+library(magrittr)
+
+network <- read.csv("MC1_matrix.csv")
+network <- network[,-1]
+
+
+for (i in 1:40) {
+  for (j in i:40) {
+    network[[i]][[j]] <- network[[j]][[i]]
+  }
+}
+
+
+network.matrix <- as.matrix(network)
+
+
+
+
+
+#not used in the rest of the code
+network.squared <- network.matrix%*%network.matrix
+node.degrees <- diag(network.squared)
+stochastic <- network
+for (i in 1:40) {
+  stochastic[[i]] <- network[[i]]/node.degrees[[i]]
+}
+eigenpairs <- eigen(stochastic,TRUE)
+#View(rankResults)
+```
+
+
+
+Here are the results!
+  1: GG7
+  2: G8, G4, G3, GG6
+  3: GG2
+  4: G5
+  5: G7
+  6: G2
+  7: GG1
+  8: GG3, GG0, C6, GG5, C1, E4, E2, C8, G6
+  9: G0
+  10: G1
+  11: GG4, E3, E0
+  12: C3, C4, C0, C2, E1
+  13: R4,C5
+  14: R2
+  15: R0
+  16: R6
+  17: R7
+  18: R1
+  19: R5, R3, C7, Base
+
+```{r iGraphPageRank}
+library(igraph)
+
+g <- graph_from_adjacency_matrix(network.matrix,"undirected",diag = FALSE)
+
+page_rank(g)
+results <- sort(page_rank(g)[[1]]) %>% rev()
+plot(1:40,results)
+```
