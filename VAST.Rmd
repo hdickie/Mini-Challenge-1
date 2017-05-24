@@ -5,48 +5,12 @@ date: "May 22, 2017"
 output: html_document
 ---
 
-I tried to implement pagerank myself but it didn't work. Here's what did that did not produce the correct result:
-1. divide each column by the sum of that column (making it stochastic)
-2. Find the eigenvectors and eigenvalues
-3. If the dominant eigenvalue is unique, then the first eigenvector is the pagerank vector such that:
-  i) the magnitude of each entry represents place in rank hierarchy (the exact value will be a gross decimal but when you put them all in order and then number them 1 to whatever you have performed the rank)
-  
-Any ideas where I went wrong?
-
-```{r pageRank}
+```{r setup}
 library(magrittr)
-
-network <- read.csv("MC1_matrix.csv")
-network <- network[,-1]
-
-
-for (i in 1:40) {
-  for (j in i:40) {
-    network[[i]][[j]] <- network[[j]][[i]]
-  }
-}
-
-
-network.matrix <- as.matrix(network)
-
-
-
-
-
-#not used in the rest of the code
-network.squared <- network.matrix%*%network.matrix
-node.degrees <- diag(network.squared)
-stochastic <- network
-for (i in 1:40) {
-  stochastic[[i]] <- network[[i]]/node.degrees[[i]]
-}
-eigenpairs <- eigen(stochastic,TRUE)
-#View(rankResults)
 ```
 
 
-
-Here are the results!
+Results!
   1: GG7
   2: G8, G4, G3, GG6
   3: GG2
@@ -68,6 +32,19 @@ Here are the results!
   19: R5, R3, C7, Base
 
 ```{r iGraphPageRank}
+network <- read.csv("MC1_matrix.csv")
+network <- network[,-1]
+
+
+for (i in 1:40) {
+  for (j in i:40) {
+    network[[i]][[j]] <- network[[j]][[i]]
+  }
+}
+
+
+network.matrix <- as.matrix(network)
+
 library(igraph)
 
 g <- graph_from_adjacency_matrix(network.matrix,"undirected",diag = FALSE)
@@ -75,4 +52,34 @@ g <- graph_from_adjacency_matrix(network.matrix,"undirected",diag = FALSE)
 page_rank(g)
 results <- sort(page_rank(g)[[1]]) %>% rev()
 plot(1:40,results)
+```
+
+```{r sensorData}
+setwd("C:/Users/Hume Dickie/Desktop/Github/Mini-Challenge-1")
+sensor <- read.csv("Lekagul Sensor Data.csv")
+View(sensor)
+
+timestamp.raw <- sensor[,1]
+timestamp <- rep(list(),dim(sensor)[1])
+for (i in seq_along(timestamp.raw)) {
+  if (i %% 10000 == 0) {
+    print(i/dim(sensor)[1])
+  }
+  timestamp[[i]] <- as.POSIXlt(timestamp.raw[[i]])
+}
+
+
+```
+
+Definitely a summer location
+```{r exploratoryAnaylsis}
+
+plot(table(date.split))
+plot(table(time.split))
+
+sorted.time <- time.split %>% table() %>% sort() %>% rev()
+topTenTimes <- sorted.time[1:10]
+
+
+plot(table(time.split)[which(table(time.split) < 10)])
 ```
