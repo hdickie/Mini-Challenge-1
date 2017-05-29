@@ -7,6 +7,8 @@ output: html_document
 
 ```{r setup}
 library(magrittr)
+
+alreadyRun.timestamp <- FALSE
 ```
 
 
@@ -32,7 +34,8 @@ Results!
   19: R5, R3, C7, Base
 
 ```{r iGraphPageRank}
-network <- read.csv("MC1_matrix.csv")
+setwd("C:/Users/Hume Dickie/Desktop/Github/Mini-Challenge-1/data/")
+network <- read.csv("matrix.csv")
 network <- network[,-1]
 
 
@@ -50,26 +53,47 @@ library(igraph)
 g <- graph_from_adjacency_matrix(network.matrix,"undirected",diag = FALSE)
 
 page_rank(g)
-results <- sort(page_rank(g)[[1]]) %>% rev()
+pagerank.results <- sort(page_rank(g)[[1]]) %>% rev()
 plot(1:40,results)
 ```
 
 ```{r sensorData}
-setwd("C:/Users/Hume Dickie/Desktop/Github/Mini-Challenge-1")
-sensor <- read.csv("Lekagul Sensor Data.csv")
+setwd("C:/Users/Hume Dickie/Desktop/Github/Mini-Challenge-1/data")
+sensor <- read.csv("sensor.csv")
 View(sensor)
 
 timestamp.raw <- sensor[,1]
 timestamp <- rep(list(),dim(sensor)[1])
-for (i in seq_along(timestamp.raw)) {
-  if (i %% 10000 == 0) {
-    print(i/dim(sensor)[1])
+
+#just to keep me from accidentally rerunning this bc it takes SO long
+if (!alreadyRun.timestamp) {
+  for (i in seq_along(timestamp.raw)) {
+    if (i %% 10000 == 0) {
+      print(i/dim(sensor)[1])
+    }
+    timestamp[[i]] <- as.POSIXlt(timestamp.raw[[i]])
   }
-  timestamp[[i]] <- as.POSIXlt(timestamp.raw[[i]])
+  alreadyRun.timestamp <- TRUE
+  
+  save(timestamp,"timestamp",file="timestamp-obj.RData")
 }
 
 
+
 ```
+
+(35460 entries with an entrance, divided by 2 =)
+17,730 total visitors?
+
+However, 18,708 unique car.ids!
+
+But, the number of unique vehicles that have been to a ranger base is 998
+
+17,730 + 998 = 18728. So if 20 unique non-ranger vehicles visited the range base, then all the numbers add up!
+That would mean there are 978 rangers for a very small number of camping spots though...
+
+
+
 
 Definitely a summer location
 ```{r exploratoryAnaylsis}
@@ -80,6 +104,68 @@ plot(table(time.split))
 sorted.time <- time.split %>% table() %>% sort() %>% rev()
 topTenTimes <- sorted.time[1:10]
 
+#the number of unique vehicles that have been to a ranger base
+length(unique(sensor[which(sensor$gate.name == "ranger-base"),"car.id"]))
 
-plot(table(time.split)[which(table(time.split) < 10)])
+
+#plot(table(time.split)[which(table(time.split) < 10)])
+
+#plot(table(sensor$gate.name))
+
+#activity order
+activity.order <- sensor$gate.name %>% table() %>% sort() %>% names() %>% rev()
+pagerank.order <- pagerank.results %>% sort() %>% names() %>% rev()
+
+look.for.nonrandomness <- as.data.frame(cbind(pagerank.order,activity.order))
+#not sure on the best way to use this. It's most meaningful at the ends but muddier in the middles
+```
+
+\\
+Relative popularity of entrances (low to high): 3, 2, 4, 0, 1
+                                      Expected: 2, 4, 0, 3, 1
+                                      
+3 is the only mismatch!
+\\
+Campsite popularity:
+real: 8,5,4,6,3,2,7,0,1
+xpctd:6,1,8,3,0,4,2,5,7
+
+1 is a lot less popular, 5 is a lot more popular
+
+\\
+active cars map: string car.id <-> string status ("Null","Inside","Exited")
+
+car paths dataframe: string car.id,list of times,list of gates
+
+For each line,
+  if this node is an entrance
+    if this car.id is in the park
+      end the path, and indicate that this car is NOT IN the park
+    else
+      start a new path, and indicate that this car is IN the park
+  else
+    add this node to a path
+
+```{r recordsToPaths}
+active.cars
+visit.paths
+
+is.entrance <- function(gate) {
+
+  if (length(grep("entrance[0-4]",gate)) != 1) {
+    return(FALSE)
+  }
+  return(TRUE)
+}
+
+is.in.park <- function(id) {
+  
+}
+
+for (r in 1:dim(sensor)[1]) {
+  if (is.entrance(r$gate.name)) {
+    
+  }
+}
+
 ```
