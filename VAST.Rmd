@@ -7,6 +7,7 @@ output: html_document
 
 ```{r setup}
 library(magrittr)
+library(ggplot2)
 
 alreadyRun.timestamp <- FALSE
 ```
@@ -54,13 +55,13 @@ g <- graph_from_adjacency_matrix(network.matrix,"undirected",diag = FALSE)
 
 page_rank(g)
 pagerank.results <- sort(page_rank(g)[[1]]) %>% rev()
-plot(1:40,results)
+plot(1:40,pagerank.results)
 ```
 
 ```{r sensorData}
 setwd("C:/Users/Hume Dickie/Desktop/Github/Mini-Challenge-1/data")
 sensor <- read.csv("sensor.csv")
-View(sensor)
+#View(sensor)
 
 timestamp.raw <- sensor[,1]
 timestamp <- rep(list(),dim(sensor)[1])
@@ -95,24 +96,9 @@ That would mean there are 978 rangers for a very small number of camping spots t
 
 
 
-Definitely a summer location
+From earlier code I didn't save, the park is definitely a summer location
 ```{r exploratoryAnaylsis}
 
-plot(table(date.split))
-plot(table(time.split))
-
-sorted.time <- time.split %>% table() %>% sort() %>% rev()
-topTenTimes <- sorted.time[1:10]
-
-#the number of unique vehicles that have been to a ranger base
-length(unique(sensor[which(sensor$gate.name == "ranger-base"),"car.id"]))
-
-
-#plot(table(time.split)[which(table(time.split) < 10)])
-
-#plot(table(sensor$gate.name))
-
-#activity order
 activity.order <- sensor$gate.name %>% table() %>% sort() %>% names() %>% rev()
 pagerank.order <- pagerank.results %>% sort() %>% names() %>% rev()
 
@@ -133,39 +119,72 @@ xpctd:6,1,8,3,0,4,2,5,7
 1 is a lot less popular, 5 is a lot more popular
 
 \\
-active cars map: string car.id <-> string status ("Null","Inside","Exited")
 
-car paths dataframe: string car.id,list of times,list of gates
 
-For each line,
-  if this node is an entrance
-    if this car.id is in the park
-      end the path, and indicate that this car is NOT IN the park
-    else
-      start a new path, and indicate that this car is IN the park
-  else
-    add this node to a path
+```{r checkOutSomePaths}
+setwd("C:/Users/Hume Dickie/Desktop/Github/Mini-Challenge-1/data/")
+labels = c("ID","enterTime")
+for (i in 1:69) {
+  labels <- c(labels,paste("N",i,sep=""),paste("dt",i,sep=""))
+}
+labels <- c(labels,"N70")
+paths <- read.table("entries31max.txt",col.names = labels,fill = TRUE,sep=";")
 
-```{r recordsToPaths}
-active.cars
-visit.paths
-
-is.entrance <- function(gate) {
-
-  if (length(grep("entrance[0-4]",gate)) != 1) {
-    return(FALSE)
+#add path lengths
+for (p in paths){
+  for (i in 1:49) { #we know weird car is length 70 and everything else at most 49
+    #TODO
   }
-  return(TRUE)
+}
+```
+
+
+
+Just picking out the patterns I've seen
+
+There is a weird car!!! It entered the park at 2015-06-05 14:57:59 and NEVER LEFT
+```{r classificationByInspection}
+
+weirdCar.path <- paths[16414,]
+weirdCar.id <- "20155705025759-63"
+
+weirdCar.sensor <- sensor[which(sensor$car.id == weirdCar.id),]
+View(weirdCar.path)
+
+
+
+
+#path length distro
+path.distro <- list()
+for (i in 1:49) {
+  currLab <- paste("N",i,sep="")
+  path.distro[[i]] <- dim(paths[which(paths[currLab] != ""),])[1]
 }
 
-is.in.park <- function(id) {
-  
+#ranger path length distro
+ranger.path.distro <- list()
+paths.start.base <- paths[which(paths$N1 == "B"),]
+for (i in 1:49) {
+  currLab <- paste("N",i,sep="")
+  ranger.path.distro[[i]] <- dim(paths.start.base[which(paths.start.base[currLab] != ""),])[1]
 }
 
-for (r in 1:dim(sensor)[1]) {
-  if (is.entrance(r$gate.name)) {
-    
-  }
+#all minus ranger distro (for comparison)
+path.minus.ranger.distro <- list()
+paths.minus.rangers <- paths[-which(paths$N1 == "B"),]
+for (i in 1:49){
+  currLab <- paste("N",i,sep="")
+  path.minus.ranger.distro[[i]] <- dim(paths.minus.rangers[which(paths.minus.rangers[currLab] != ""),])[1]
 }
 
 ```
+
+All paths 28 or longer are rangers (except that 1 creepy car)
+```{r takeaways}
+#On average, rangers have much longer paths than the overall population of visitors
+#Note that the y-axes are very different!
+par(mfrow=c(2,1))
+plot(1:27,path.minus.ranger.distro[1:27])
+plot(1:27,ranger.path.distro[1:27])
+```
+
