@@ -347,7 +347,7 @@ faded.show()
                 
                 
 #what is the longest path? 70
-
+os.chdir("C:/Users/Hume Dickie/Desktop/Github/Mini-Challenge-1/data")
 #print results!
 if (writeVisits):
     visits = open("visits.txt",'w')
