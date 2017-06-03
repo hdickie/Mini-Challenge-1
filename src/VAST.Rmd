@@ -1,0 +1,208 @@
+---
+title: "VAST"
+author: "Hume Dickie"
+date: "May 22, 2017"
+output: html_document
+---
+
+\\Meta stuff
+From earlier code I didn't save, the park is definitely a summer location. There is a plot in the img folder though.
+
+
+
+
+
+
+
+
+
+
+
+```{r setup}
+library(magrittr)
+library(ggplot2)
+
+run.pagerank <- FALSE
+
+alreadyRun.timestamp <- FALSE
+```
+
+
+Pagerank Results!
+  1: GG7
+  2: G8, G4, G3, GG6
+  3: GG2
+  4: G5
+  5: G7
+  6: G2
+  7: GG1
+  8: GG3, GG0, C6, GG5, C1, E4, E2, C8, G6
+  9: G0
+  10: G1
+  11: GG4, E3, E0
+  12: C3, C4, C0, C2, E1
+  13: R4,C5
+  14: R2
+  15: R0
+  16: R6
+  17: R7
+  18: R1
+  19: R5, R3, C7, Base
+
+```{r iGraphPageRank}
+if (run.pagerank) {
+  setwd("C:/Users/Hume Dickie/Desktop/Github/Mini-Challenge-1/data/")
+  network <- read.csv("matrix.csv")
+  network <- network[,-1]
+  
+  
+  for (i in 1:40) {
+    for (j in i:40) {
+      network[[i]][[j]] <- network[[j]][[i]]
+    }
+  }
+  
+  
+  network.matrix <- as.matrix(network)
+  
+  library(igraph)
+  
+  g <- graph_from_adjacency_matrix(network.matrix,"undirected",diag = FALSE)
+  
+  page_rank(g)
+  pagerank.results <- sort(page_rank(g)[[1]]) %>% rev()
+  plot(1:40,pagerank.results)
+}
+```
+
+```{r loadData}
+setwd("C:/Users/Hume Dickie/Desktop/Github/Mini-Challenge-1/data")
+sensor <- read.csv("sensor.csv")
+#View(sensor)
+
+timestamp.raw <- sensor[,1]
+timestamp <- rep(list(),dim(sensor)[1])
+
+#just to keep me from accidentally rerunning this bc it takes SO long
+print("Converting timestamp strings to timestamp objects.")
+if (!alreadyRun.timestamp) {
+  for (i in seq_along(timestamp.raw)) {
+    if (i %% 10000 == 0) {
+      print(i/dim(sensor)[1])
+    }
+    timestamp[[i]] <- as.POSIXlt(timestamp.raw[[i]])
+  }
+  alreadyRun.timestamp <- TRUE
+  
+  save(timestamp,"timestamp",file="timestamp-obj.RData")
+}
+
+
+
+```
+
+
+
+
+Relative popularity of entrances (low to high): 3, 2, 4, 0, 1
+                                      Expected: 2, 4, 0, 3, 1
+                                      
+3 is the only mismatch!
+\\
+Campsite popularity:
+real: 8,5,4,6,3,2,7,0,1
+xpctd:6,1,8,3,0,4,2,5,7
+
+1 is a lot less popular, 5 is a lot more popular
+
+\\
+```{r pagerankVersusReality}
+
+activity.order <- sensor$gate.name %>% table() %>% sort() %>% names() %>% rev()
+pagerank.order <- pagerank.results %>% sort() %>% names() %>% rev()
+
+look.for.nonrandomness <- as.data.frame(cbind(pagerank.order,activity.order))
+#not sure on the best way to use this. It's most meaningful at the ends but muddier in the middles
+```
+
+
+
+
+```{r loadPaths}
+setwd("C:/Users/Hume Dickie/Desktop/Github/Mini-Challenge-1/data/")
+labels = c("ID","neveredEntered","enterTime","length","totalTime")
+for (i in 1:69) {
+  labels <- c(labels,paste("N",i,sep=""),paste("dt",i,sep=""))
+}
+labels <- c(labels,"N70")
+paths <- read.table("abbrev-paths.txt",col.names = labels,fill = TRUE,sep=";",row.names=NULL)
+```
+
+
+
+Patterns:
+  Thru traffic
+  Rangers
+  Campers
+  Weird car
+
+There is a weird car!!! It entered the park at 2015-06-05 14:57:59 and NEVER LEFT
+```{r classificationByInspection}
+
+weirdCar.path <- paths[16414,]
+weirdCar.id <- "20155705025759-63"
+
+weirdCar.sensor <- sensor[which(sensor$car.id == weirdCar.id),]
+
+
+
+
+
+#ranger path length distro
+ranger.path.distro <- list()
+paths.start.base <- paths[which(paths$N1 == "B"),]
+for (i in 1:49) {
+  currLab <- paste("N",i,sep="")
+  ranger.path.distro[[i]] <- dim(paths.start.base[which(paths.start.base[currLab] != ""),])[1]
+}
+
+#all minus ranger distro (for comparison)
+path.minus.ranger.distro <- list()
+paths.minus.rangers <- paths[-which(paths$N1 == "B"),]
+for (i in 1:49){
+  currLab <- paste("N",i,sep="")
+  path.minus.ranger.distro[[i]] <- dim(paths.minus.rangers[which(paths.minus.rangers[currLab] != ""),])[1]
+}
+
+traffic <- paths[which(paths$length == 2),]
+traffic.table <- table(traffic$N1,traffic$N2)
+#all entered through entrances, but B shows up with zero for some reason
+#end points are more diverse and there are a lot more entries showning up w 0
+
+```
+
+All paths 28 or longer are rangers (except that 1 creepy car)
+```{r takeaways}
+#On average, rangers have much longer paths than the overall population of visitors
+#Note that the y-axes are very different!
+par(mfrow=c(2,1))
+plot(1:27,path.minus.ranger.distro[1:27])
+plot(1:27,ranger.path.distro[1:27])
+```
+
+
+```{r carsStillInPark}
+setwd("C:/Users/Hume Dickie/Desktop/Github/Mini-Challenge-1/data/")
+activeCars <- read.table("activeCars.txt",row.names = NULL)
+activeCars <- as.data.frame(activeCars)
+names(activeCars) <- "car.id"
+
+mysteryCars <- paths[is.element(paths$ID,activeCars$car.id),] #all at the end. They just haven't left the park yet!
+```
+
+```{r neverEntered}
+neverEntered <- paths[paths$neveredEntered,]
+#View(neverEntered)
+
+#nobody! Strange?
+```
