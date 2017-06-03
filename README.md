@@ -14,7 +14,7 @@
 Its input is a `VisitRecord`. `rowsToRecords` generates `VisitRecord`s.
 
 ### Ok, how do I use the `rowsToRecords` function?
-Its input is a the string path of the raw data downloaded from the VAST website.
+Its input is the string path of the raw data downloaded from the VAST website.
 
 The output of `rowsToRecords("path/to/raw/data")` is a map:
 * `String` of a `car.id` -> a `list` of `VisitRecord`
