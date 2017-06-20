@@ -150,3 +150,6 @@ def isEntranceOrBase(gate):
     is_b = (gate == "ranger-base")
     return is_e or is_b
     
+def isCampsite(gate):
+    return re.search("camping[0-8]",gate)
+    

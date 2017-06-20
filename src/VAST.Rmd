@@ -129,7 +129,7 @@ look.for.nonrandomness <- as.data.frame(cbind(pagerank.order,activity.order))
 
 
 ```{r loadPaths}
-setwd("C:/Users/Hume Dickie/Desktop/Github/Mini-Challenge-1/data/")
+setwd("C:/Users/Hume Dickie/Desktop/Github/Mini-Challenge-1/output/")
 labels = c("ID","neveredEntered","enterTime","length","totalTime")
 for (i in 1:69) {
   labels <- c(labels,paste("N",i,sep=""),paste("dt",i,sep=""))
@@ -202,7 +202,63 @@ mysteryCars <- paths[is.element(paths$ID,activeCars$car.id),] #all at the end. T
 
 ```{r neverEntered}
 neverEntered <- paths[paths$neveredEntered,]
-#View(neverEntered)
+View(neverEntered)
 
 #nobody! Strange?
+```
+
+```{r look}
+setwd("C:/Users/Hume Dickie/Desktop/Github/Mini-Challenge-1/output/")
+indi <- read.csv("individual-records.txt",sep=";")
+```
+
+```{r temp}
+run <- ""
+for (n in names(paths)){
+  run <- paste(run,n,sep=",")
+}
+```
+
+WOAH THIS IS CRAZY. Paths jointed to the entry!!!
+```{r LegakulSensorDate_Join1}
+setwd("C:/Users/Hume Dickie/Desktop/Github/Mini-Challenge-1/data/")
+LegSense <- read.csv("Lekagul Sensor Data.csv")
+```
+
+
+
+
+
+preliminary results:
+C8  | SIZE = 925
+C3  | SIZE = 495
+C2  | SIZE = 805
+C1  | SIZE = 14
+C0  | SIZE = 480
+C7  | SIZE = 526
+C6  | SIZE = 403
+C5  | SIZE = 1186
+C4  | SIZE = 960
+
+Has not been double checked!
+
+```{r groupDetection}
+setwd("C:/Users/Hume Dickie/Desktop/Github/Mini-Challenge-1/output/")
+campRecs <- read.csv("campsite-records.txt",sep=";",stringsAsFactors = FALSE)
+campRecs <- campRecs[order(campRecs$startTimestamp),]
+
+write.csv(campRecs,"campsite-records-sorted.csv")
+```
+
+
+just real quick
+```{r plotCampsiteFrequency}
+camps <- c("C8","C3","C2","C1","C0","C7","C6","C5","C4")
+vals <- c(925,495,805,14,480,526,403,1186,960)
+
+plt <- as.data.frame(cbind(camps,vals))
+
+library(ggplot2)
+ggplot(data = plt) + 
+  geom_line()
 ```

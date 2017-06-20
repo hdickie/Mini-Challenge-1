@@ -13,9 +13,3 @@ outputDirectory = "C:/Users/Hume Dickie/Desktop/Github/Mini-Challenge-1/output"
 
 mapName = "labeled-map.jpg"     #put this file in /img
 rawDataName = "sensor.csv"      #put this file in /data
-
-#these will be written in /output
-writeVisits = True
-writePaths = True
-writedfEntries = True
-actCars = True

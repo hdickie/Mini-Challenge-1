@@ -7,21 +7,29 @@ Created on Fri Jun 02 17:58:25 2017
 
 #Driver.py
 
-import os
-from config import dataDirectory, rawDataName
-from rowsToRecords import rowsToRecords
-from Output import writeOutputFiles, plotPath
+from IO import writeIndividualRecords, writeCampsiteRecords
+from IO import getIndividualRecords, getCampsiteRecords, getGroupHangouts
 
-os.chdir(dataDirectory)
-records = rowsToRecords(rawDataName) 
+#records = getIndividualRecords()
+#writeIndividualRecords(records)
 
-writeOutputFiles(records)
+campRecs = getCampsiteRecords()
+writeCampsiteRecords(campRecs)
+
+#sortedRecs = getGroupHangouts()
   
 #weird car "20155705025759-63"
 # a ranger "20153722123707-242"
-plot = plotPath(records["20153722123707-242"][0])
+#plot = plotPath(records["20155201075209-669"][0])
 
-plot.show()
+#plot.show()
+#if this code isn't working then make sure config.py is right
 
+#campRecs = pathsToCampRecords("abbrev-paths.txt")
 
-#if this code isn't working then make sure congif.py is right
+#os.chdir(outputDirectory)
+#recs = open("campRecords.txt",'w')
+#recs.write("car.id;beginTimestamp;gate.name;duration\n")
+#for rec in campRecs:
+#    recs.write(rec)
+#recs.close()
