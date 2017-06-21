@@ -81,14 +81,14 @@ def indiRecordsToCampRecords(indiRecordsLines):
                 campEntranceTime = dt.fromtimestamp(campEntranceTimeUnix)
                     
                 oline += str(campEntranceTime) + ";"
-                oline += str(int(parkEntranceTimestamp)) + ";" #startTimestamp
+                oline += str(int(campEntranceTimeUnix)) + ";" #startTimestamp
                 oline += line[6 + disp*2 - 1] + ";" #gaten.name
                 
                 duration = line[6 + disp*2][0:len(line[6 + disp*2])-2]
                 oline += duration +";" #duration
                 
                 estimatedEnd = dt.fromtimestamp((campEntranceTimeUnix + float(duration)))
-                oline += str(campEntranceTimeUnix + float(duration)) + ";"
+                oline += str(campEntranceTimeUnix + float(duration)) + ";" #
                 oline += str(estimatedEnd) + "\n"
                 campRecs.append(oline)
                 
