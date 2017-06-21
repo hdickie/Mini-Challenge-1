@@ -111,7 +111,7 @@ def writeCampsiteRecords(campRecs):
     os.chdir(outputDirectory)
     
     campsiteRecords = open("campsite-records.txt",'w')
-    campsiteRecords.write("car.id;car.type;startDatetime;startTimestamp;gate.name;duration;endTimestamp;endDatetime\n")
+    campsiteRecords.write("car.id,car.type,startDatetime,startTimestamp,gate.name,duration,endTimestamp,endDatetime\n")
     for line in campRecs:
         campsiteRecords.write(line)
     campsiteRecords.close()

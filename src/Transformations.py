@@ -69,8 +69,8 @@ def indiRecordsToCampRecords(indiRecordsLines):
             #if they were there longer than a day
             if (int(line[6 + disp*2][0:len(line[6 + disp*2])-2]) > 60*60*24/2) :
                 assert (line[6 + disp*2 - 1] == line[6 + disp*2 + 1])  #enter and exit gate match
-                oline = line[0] + ";" #car.id
-                oline += line[1] + ";" #car.type
+                oline = line[0] + "," #car.id
+                oline += line[1] + "," #car.type
                 
                 parkEntranceTimestamp = time.mktime(dt.strptime(line[2],"%Y-%m-%d %H:%M:%S").timetuple())         
                 
@@ -80,15 +80,15 @@ def indiRecordsToCampRecords(indiRecordsLines):
                 campEntranceTimeUnix = parkEntranceTimestamp + entranceToCampTime
                 campEntranceTime = dt.fromtimestamp(campEntranceTimeUnix)
                     
-                oline += str(campEntranceTime) + ";"
-                oline += str(int(campEntranceTimeUnix)) + ";" #startTimestamp
-                oline += line[6 + disp*2 - 1] + ";" #gaten.name
+                oline += str(campEntranceTime) + ","
+                oline += str(int(campEntranceTimeUnix)) + "," #startTimestamp
+                oline += line[6 + disp*2 - 1] + "," #gaten.name
                 
                 duration = line[6 + disp*2][0:len(line[6 + disp*2])-2]
                 oline += duration +";" #duration
                 
                 estimatedEnd = dt.fromtimestamp((campEntranceTimeUnix + float(duration)))
-                oline += str(campEntranceTimeUnix + float(duration)) + ";" #
+                oline += str(campEntranceTimeUnix + float(duration)) + "," #
                 oline += str(estimatedEnd) + "\n"
                 campRecs.append(oline)
                 
