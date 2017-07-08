@@ -181,7 +181,19 @@ def getGroupHangouts():
     
     return hangouts
       
+def writeGroupHangouts(hangouts):
+    prevDir = os.getcwd()
+    os.chdir(outputDirectory)
+
+    groups = open("campsite-population-time-series.txt",'w')
+    groups.write("time,gate,car.id,population\n")
+    for camp in hangouts:
+        for line in hangouts[camp]:
+            temp = str(line[0]) + "," + str(line[1]) + "," + str(line[2]) + "," + str(line[3]) + "\n"
+            groups.write(temp)
+    groups.close()
     
+    os.chdir(prevDir)
 #TODO
 def plotPathsAsHeat(listOfPaths):
     print 5

@@ -7,60 +7,39 @@ Created on Mon Jun 12 20:40:16 2017
 
 #GroupHangout.py
 class GroupHangout:
-    def __init__(self,carId,startTimestamp,gate):
+    def __init__(self,carId,startTime,endTime,gate):
         
-        self.firstCar = carId
-        self.startTime = startTimestamp
-        self.endTime = None
+        self.startTime = startTime
+        self.endTime = endTime
         self.gate = gate
         
-        self.camperIDs = [carId]
-        self.lastCar = None
         self.maxSize = 1
         self.size = 1
         
-        newCar = GroupHangout.GroupMember(carId,startTimestamp)        
-        self.groupMembers = [newCar]
+        newCar = GroupHangout.Car(carId,startTime,endTime)        
+        self.cars = [newCar]
         
-    def addCamper(self,carId,arriveTime):
+    def addCar(self,carId,arriveTime,exitTime):
         if carId in self.camperIDs:
             print "WARNING"
-            print carId, " was already at campsite ", self.gate, " when it arrived."
+            print carId, " was already at campsite ", self.gate, " when it (allegedly!) arrived."
             
-        self.camperIDs.append(carId)
-        self.groupMembers.append(GroupHangout.GroupMember(carId,arriveTime))
+        self.cars.append(GroupHangout.Car(carId,arriveTime,exitTime))
         self.size += 1
         
         if (len(self.camperIDs) > self.maxSize):
-            self.maxSize = len(self.camperIDs)
+            self.maxSize = len(self.cars)
             
         if carId not in self.camperIDs:
-            newCar = GroupHangout.GroupMember(carId,arriveTime) 
-            self.groupMembers.append(newCar)
-        
-    def removeCamper(self,carId,departTime):
-        if carId not in self.camperIDs:
-            print "WARNING"
-            print carId, " was not at campsite ", self.gate, " when it left."
+            newCar = GroupHangout.Car(carId,arriveTime,exitTime) 
+            self.cars.append(newCar)
             
-        self.camperIDs.remove(carId)
-        self.size -= 1
-        
-        if (len(self.camperIDs) == 0):
-            self.lastCar = carId
-            self.endTime = departTime
+    def close():
+        print 5
+        #TODO
             
-    def containsCamper(self,carId):
+    def containsCar(self,carId):
         return carId in self.camperIDs
-            
-    def getGroupMembers(self):
-        return self.groupMembers
-        
-    def maxSize(self):
-        return self.maxSize
-        
-    def getSize(self):
-        return self.size
     
     def getDuration(self):
         if self.endTime is None:
@@ -81,10 +60,11 @@ class GroupHangout:
         running = running[0:len(running)-1] #remove last comma
         return running
         
-    class GroupMember:
-        def __init__(self,carId,arriveTime):
+    class Car:
+        def __init__(self,carId,arriveTime,exitTime):
             self.carId = carId
             self.arriveTime = arriveTime
+            self.exitTime = exitTime
             
         def __repr__(self):
             return self.carId

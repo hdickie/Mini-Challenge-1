@@ -77,7 +77,7 @@ if (run.pagerank) {
 
 ```{r loadData}
 setwd("C:/Users/Hume Dickie/Desktop/Github/Mini-Challenge-1/data")
-sensor <- read.csv("sensor.csv")
+sensor <- read.csv("Lekagul Sensor Data.csv", stringsAsFactors = FALSE)
 #View(sensor)
 
 timestamp.raw <- sensor[,1]
@@ -90,15 +90,16 @@ if (!alreadyRun.timestamp) {
     if (i %% 10000 == 0) {
       print(i/dim(sensor)[1])
     }
-    timestamp[[i]] <- as.POSIXlt(timestamp.raw[[i]])
+    timestamp[[i]] <- strptime(timestamp.raw[[i]],"%m/%d/%Y %H:%M")
   }
   alreadyRun.timestamp <- TRUE
   
-  save(timestamp,"timestamp",file="timestamp-obj.RData")
+  #save(timestamp,"timestamp",file="timestamp-obj.RData")
 }
 
-
-
+sensor$Timestamp <- timestamp
+sensor.ordered <- sensor[order(timestamp),]
+View(sensor)
 ```
 
 
@@ -244,10 +245,10 @@ Has not been double checked!
 
 ```{r groupDetection}
 setwd("C:/Users/Hume Dickie/Desktop/Github/Mini-Challenge-1/output/")
-campRecs <- read.csv("campsite-records.txt",sep=";",stringsAsFactors = FALSE)
+campRecs <- read.csv("campsite-records.txt",sep=",",stringsAsFactors = FALSE)
 campRecs <- campRecs[order(campRecs$startTimestamp),]
 
-write.csv(campRecs,"campsite-records-sorted.csv")
+#write.csv(campRecs,"campsite-records-sorted.csv")
 ```
 
 
@@ -261,4 +262,44 @@ plt <- as.data.frame(cbind(camps,vals))
 library(ggplot2)
 ggplot(data = plt) + 
   geom_line()
+```
+
+```{r whatIsPopulation}
+setwd("C:/Users/Hume Dickie/Desktop/Github/Mini-Challenge-1/output/")
+popTimeSeries <- read.csv("campsite-population-time-series.txt")
+#View(popTimeSeries)
+
+C6 <- popTimeSeries[which(popTimeSeries$gate=="C6"),]
+names(popTimeSeries)
+```
+
+```{r sortCampRecs}
+times.arrive.raw <- campRecs.C6$startTimestamp
+times.leave.raw <- campRecs.C6$endTimestamp
+
+for (i in seq_along(times.raw)) {
+  if (i %% 10000 == 0) {
+    print(i/dim(sensor)[1])
+  }
+  timestamp[[i]] <- strptime(timestamp.raw[[i]],"%m/%d/%Y %H:%M")
+}
+```
+
+Gotta crawl through it
+
+20155705025759-63 is the only car in C6 an odd number of times
+```{r validateSuspiciousGroupPlot}
+setwd("C:/Users/Hume Dickie/Desktop/Github/Mini-Challenge-1/output/")
+popTimeSeries <- read.csv("campsite-population-time-series.txt")
+
+C6 <- popTimeSeries[which(popTimeSeries$gate=="C6"),]
+par(mfrow=c(2,1))
+plot(1:917,C6$population)
+lines(1:917,C6$population)
+plot(1:10,C6[1:10,"population"])
+lines(1:10,C6[1:10,"population"])
+
+ftable(table(C6$car.id))
+
+car.odd.times <- C6[which(C6$car.id=="20155705025759-63"),]
 ```
