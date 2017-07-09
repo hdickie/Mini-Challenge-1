@@ -211,6 +211,8 @@ View(neverEntered)
 ```{r look}
 setwd("C:/Users/Hume Dickie/Desktop/Github/Mini-Challenge-1/output/")
 indi <- read.csv("individual-records.txt",sep=";")
+
+#indi.single <- indi[which(indi$car.id==""),]
 ```
 
 ```{r temp}
@@ -248,7 +250,7 @@ setwd("C:/Users/Hume Dickie/Desktop/Github/Mini-Challenge-1/output/")
 campRecs <- read.csv("campsite-records.txt",sep=",",stringsAsFactors = FALSE)
 campRecs <- campRecs[order(campRecs$startTimestamp),]
 
-#write.csv(campRecs,"campsite-records-sorted.csv")
+write.csv(campRecs,"campsite-records-sorted.csv")
 ```
 
 
