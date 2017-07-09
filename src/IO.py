@@ -40,10 +40,10 @@ def plotPath(visRec):
         n0 = mapAbbrev[visRec.path[i]]
         n1 = mapAbbrev[visRec.path[i+1]]
         
-        iR = int((c1[0] - c0[0])*(float(i)/(len(visRec.path)-1)))
-        iG = int((c1[1] - c0[1])*(float(i)/(len(visRec.path)-1)))
-        iB = int((c1[2] - c0[2])*(float(i)/(len(visRec.path)-1)))
-        ia = int((c1[3] - c0[3])*(float(i)/(len(visRec.path)-1)))
+        iR = int((c1[0] - c0[0])*(float(i+1)/(len(visRec.path))))
+        iG = int((c1[1] - c0[1])*(float(i+1)/(len(visRec.path))))
+        iB = int((c1[2] - c0[2])*(float(i+1)/(len(visRec.path))))
+        ia = int((c1[3] - c0[3])*(float(i+1)/(len(visRec.path))))
         
         if (iR < 0) : iR = 255 + iR
         if (iG < 0) : iG = 255 + iG
@@ -67,7 +67,11 @@ def plotPath(visRec):
                       
         font = ImageFont.truetype("arial.ttf", fontsize)                      
                       
-        imgdraw.text((x1,y1),str(i),font = font)
+        imgdraw.text((x0,y0),str(i),font = font)
+        
+        #draw last label
+        if (i == len(visRec.path)-2):
+            imgdraw.text((x1,y1),str(i),font = font)
     
     return faded
 
@@ -186,10 +190,10 @@ def writeGroupHangouts(hangouts):
     os.chdir(outputDirectory)
 
     groups = open("campsite-population-time-series.txt",'w')
-    groups.write("time,gate,car.id,population\n")
+    groups.write("time,gate,car.id,population,carType,duration\n")
     for camp in hangouts:
         for line in hangouts[camp]:
-            temp = str(line[0]) + "," + str(line[1]) + "," + str(line[2]) + "," + str(line[3]) + "\n"
+            temp = str(line[0]) + "," + str(line[1]) + "," + str(line[2]) + "," + str(line[3]) + "," + str(line[4]) + "," + str(line[5]) + "\n"
             groups.write(temp)
     groups.close()
     
