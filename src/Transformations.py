@@ -7,12 +7,13 @@ Created on Mon May 29 11:20:35 2017
 
 import csv
 import time
-from datetime import datetime as dt
+from datetime import datetime as dt, timedelta
 
 from IndividualRecord import IndividualRecord
 from ParkUtils import isEntranceOrBase, nodeIndex
 
 from GroupHangout import GroupHangout
+
 
 def rowsToIndiRecords(fileName):
     
@@ -73,14 +74,15 @@ def indiRecordsToCampRecords(indiRecordsLines):
                 
                 oline += line[1] + "," #car.type
                 
-                print line[2]
-                parkEntranceTimestamp = time.mktime(dt.strptime(line[2],"%Y-%m-%d %H:%M:%S").timetuple())         
+                parkEntranceTimestamp = time.mktime(dt.strptime(line[2],"%Y-%m-%d %H:%M:%S").timetuple())   
                 
                 entranceToCampTime = 0
                 for i in range(0,disp):
-                    entranceToCampTime += int(line[6 + disp*2][0:len(line[6 + disp*2])-2])
+                    entranceToCampTime += int(line[6 + i*2][0:len(line[6 + i*2])-2])
+
                 campEntranceTimeUnix = parkEntranceTimestamp + entranceToCampTime
                 campEntranceTime = dt.fromtimestamp(campEntranceTimeUnix)
+
                     
                 oline += str(campEntranceTime) + ","
                 oline += str(int(campEntranceTimeUnix)) + "," #startTimestamp
@@ -93,7 +95,7 @@ def indiRecordsToCampRecords(indiRecordsLines):
                 oline += str(campEntranceTimeUnix + float(duration)) + ","
                 oline += str(estimatedEnd) + "\n"
                 campRecs.append(oline)
-                
+                    
     return campRecs
     
 """
@@ -196,12 +198,15 @@ def sortedCampRecsToGroupHangouts(sortedLines):
         while True:
             time = car = carType = duration = None
                      
-            atEndOfArrive = (currAind >= len(currArrivals) - 1)
-            atEndOfDepart = (currDind >= len(currDepartures) - 1)
+            atEndOfArrive = (currAind > len(currArrivals) - 1)
+            atEndOfDepart = (currDind > len(currDepartures) - 1)
+            
+            if (c=="C1" and (atEndOfArrive or atEndOfDepart)):
+                print atEndOfArrive, atEndOfDepart
             
             #check not at the end of either list
             #if (c=="C1"): print currAind, currDind
-            if not atEndOfArrive and not atEndOfDepart:
+            if not (atEndOfArrive or atEndOfDepart):
                 #if (c == "C1"): 
                     #print currArrivals[currAind][0], " >? ", currDepartures[currDind][0]
                     #print int(currArrivals[currAind][0]) - int(currDepartures[currDind][0])
@@ -226,7 +231,7 @@ def sortedCampRecsToGroupHangouts(sortedLines):
                     population[c] -= 1
                     
                     #if (c=="C6"): print [time,c,car,population[c]], "-"
-            elif (atEndOfArrive):
+            elif (atEndOfArrive and not atEndOfDepart):
                 time = currDepartures[currDind][0]
                 car = currDepartures[currDind][1]
                 carType = currArrivals[currDind][2]
@@ -235,8 +240,8 @@ def sortedCampRecsToGroupHangouts(sortedLines):
                 currDind += 1
                 population[c] -= 1
                 
-                #if (c=="C6"): print [time,c,car,population[c]], "-*"
-            elif (atEndOfDepart):
+                if (c=="C1"): print [time,c,car,population[c]], "-*"
+            elif (atEndOfDepart and not atEndOfArrive):
                 time = currArrivals[currAind][0]
                 car = currArrivals[currAind][1]
                 carType = currArrivals[currAind][2]
@@ -244,8 +249,10 @@ def sortedCampRecsToGroupHangouts(sortedLines):
                 
                 currAind += 1
                 population[c] += 1
+            else:
+                break
                 
-                #if (c=="C6"): print [time,c,car,population[c]], "+*"
+                if (c=="C1"): print [time,c,car,population[c]], "+*"
             #else:
                 #if (c=="C6"): print [time,c,car,population[c]], "?"
             populationTimeSeries[c].append([time,c,car,population[c],carType,duration])
@@ -254,3 +261,26 @@ def sortedCampRecsToGroupHangouts(sortedLines):
                 break
         
     return populationTimeSeries
+    
+def inOutToPopTimeSeries(inOutLines):
+    
+    currPop = 0
+    output = []
+    for line in inOutLines[1:]:
+        oline = None
+        
+        if line[0] == "":
+            currPop += 1
+            oline = [line[6],line[7],line[3],currPop,line[4],line[8]]
+            
+        if line[10] == "":
+            currPop -= 1
+            oline = [line[3],line[4],line[0],currPop,line[1],line[5]]
+            
+        output.append(oline)
+    return output
+    
+    
+def classify(parkPath):
+    
+    return "5"

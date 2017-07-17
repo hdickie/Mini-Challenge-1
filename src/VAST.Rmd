@@ -5,19 +5,6 @@ date: "May 22, 2017"
 output: html_document
 ---
 
-\\Meta stuff
-From earlier code I didn't save, the park is definitely a summer location. There is a plot in the img folder though.
-
-
-
-
-
-
-
-
-
-
-
 ```{r setup}
 library(magrittr)
 library(ggplot2)
@@ -75,31 +62,24 @@ if (run.pagerank) {
 }
 ```
 
+Takes 3 - 4 minutes
 ```{r loadData}
-setwd("C:/Users/Hume Dickie/Desktop/Github/Mini-Challenge-1/data")
-sensor <- read.csv("Lekagul Sensor Data.csv", stringsAsFactors = FALSE)
-#View(sensor)
-
-timestamp.raw <- sensor[,1]
-timestamp <- rep(list(),dim(sensor)[1])
+timestamp.raw <- popTimeSeries[,"time"]
+timestamp <- rep(list(),dim(popTimeSeries)[1])
 
 #just to keep me from accidentally rerunning this bc it takes SO long
 print("Converting timestamp strings to timestamp objects.")
 if (!alreadyRun.timestamp) {
   for (i in seq_along(timestamp.raw)) {
-    if (i %% 10000 == 0) {
-      print(i/dim(sensor)[1])
+    if (i %% 1000 == 0) {
+      print(i/dim(popTimeSeries)[1])
     }
-    timestamp[[i]] <- strptime(timestamp.raw[[i]],"%m/%d/%Y %H:%M")
+    timestamp[[i]] <- head(as.POSIXct(as.numeric(as.character(popTimeSeries$time)),origin="1970-01-01",tz="GMT"))
   }
   alreadyRun.timestamp <- TRUE
   
   #save(timestamp,"timestamp",file="timestamp-obj.RData")
 }
-
-sensor$Timestamp <- timestamp
-sensor.ordered <- sensor[order(timestamp),]
-View(sensor)
 ```
 
 
@@ -294,14 +274,86 @@ Gotta crawl through it
 setwd("C:/Users/Hume Dickie/Desktop/Github/Mini-Challenge-1/output/")
 popTimeSeries <- read.csv("campsite-population-time-series.txt")
 
+C0 <- popTimeSeries[which(popTimeSeries$gate=="C0"),]
+C1 <- popTimeSeries[which(popTimeSeries$gate=="C1"),]
+C2 <- popTimeSeries[which(popTimeSeries$gate=="C2"),]
+C3 <- popTimeSeries[which(popTimeSeries$gate=="C3"),]
+C4 <- popTimeSeries[which(popTimeSeries$gate=="C4"),]
+C5 <- popTimeSeries[which(popTimeSeries$gate=="C5"),]
 C6 <- popTimeSeries[which(popTimeSeries$gate=="C6"),]
-par(mfrow=c(2,1))
-plot(1:917,C6$population)
-lines(1:917,C6$population)
-plot(1:10,C6[1:10,"population"])
-lines(1:10,C6[1:10,"population"])
+C7 <- popTimeSeries[which(popTimeSeries$gate=="C7"),]
+C8 <- popTimeSeries[which(popTimeSeries$gate=="C8"),]
 
-ftable(table(C6$car.id))
+```
 
-car.odd.times <- C6[which(C6$car.id=="20155705025759-63"),]
+```{r plotCampPops}
+library(ggplot2)
+library(gridExtra)
+
+s <- 1430492340
+e <- 1464739620
+h <- 65
+
+p0 <- ggplot(C0,aes(time,population)) + geom_line() + xlim(s,e) + ylim(0,h)
+p1 <- ggplot(C1,aes(time,population)) + geom_line() + xlim(s,e) + ylim(0,h)
+p2 <- ggplot(C2,aes(time,population)) + geom_line() + xlim(s,e) + ylim(0,h)
+p3 <- ggplot(C3,aes(time,population)) + geom_line() + xlim(s,e) + ylim(0,h)
+p4 <- ggplot(C4,aes(time,population)) + geom_line() + xlim(s,e) + ylim(0,h)
+p5 <- ggplot(C5,aes(time,population)) + geom_line() + xlim(s,e) + ylim(0,h)
+p6 <- ggplot(C6,aes(time,population)) + geom_line() + xlim(s,e) + ylim(0,h)
+p7 <- ggplot(C7,aes(time,population)) + geom_line() + xlim(s,e) + ylim(0,h)
+p8 <- ggplot(C8,aes(time,population)) + geom_line() + xlim(s,e) + ylim(0,h)
+
+grid.arrange(p0,p1,p2,p3,p4,p5,p6,p7,p8,ncol=3)
+```
+A very long string of entrances: plot(455:580,C4[455:580,"population"])
+Same plot with time accounted for: ggplot(long.increase,aes(time,population)) + geom_line()
+```{r labelWithCar}
+library(ggplot2)
+
+ggplot(C6,aes(time,population)) + 
+  geom_line()
+```
+
+```{r getCarsFromLongIncrease}
+
+long.increase <- C4[455:580,]
+C4.long.table <- table(long.increase$car.id)
+long.stay.cars <- names(C4.long.table[which(C4.long.table==1)])
+
+should.have.long.duration <- campRecs[which(campRecs$car.id %in% long.stay.cars),]
+```
+
+```{r validateWithArea}
+times <- C4$time
+pops <- C4$population
+
+dts <- list()
+for (i in 1:(dim(C4)[1]-1)){
+  dts[[i]] <- times[[i+1]]-times[[1]]
+}
+
+pop.curve.integrated <- sum(as.numeric(dts)*as.numeric(pops[1:2203]))
+actual.checksum <- sum(C4$duration)
+
+#check the integration was right by comparing line and bar plot
+bars <- as.data.frame(cbind(times[-2204],dts,pops[-2204]))
+
+#these two plots should represeent the same data
+p0 <- ggplot(bars,aes(V1,V3)) + geom_line()
+
+
+bars$time <- bars$time - bars[1,"time"]
+plot(34030140,61)
+for (i in 1:2203){ #not working fml
+  rect(bars[i,"time"],0,bars[i+1,"time"],bars[i,"pop"],col="blue")
+}
+grid.arrange(p0,p1,ncol=1)
+```
+
+
+```{r excelTrick}
+setwd("C:/Users/Hume Dickie/Desktop/Github/Mini-Challenge-1/output/")
+popTimeSeries2 <- read.csv("pop-time-series.csv")
+
 ```

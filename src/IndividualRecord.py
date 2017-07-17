@@ -55,6 +55,11 @@ class IndividualRecord:
         pathString += "\n"
         return pathString
         
+    def visitedRangerStop(self):
+        rangerStops = ["R0","R1""R2","R3","R4","R5","R6","R7","B"]
+        
+        return not set(rangerStops).isdisjoint(self.path)
+        
     #hitting max line width in .txt files made name abbrev. necessary
     def asDataFrameEntry(self):
         pathString = self.visitorId + ";"               #id
@@ -62,15 +67,17 @@ class IndividualRecord:
         pathString += str(self.times[0]) + ";"          #enterTime
         pathString += str(len(self.path)) + ";"         #pathLength
         pathString += self.getTotalTime() + ";"         #totalTime
-        pathString += mapAbbrev[self.path[0]] +";"      #startGate
+        pathString += mapAbbrev[self.path[0]] +";"      #startGate 
+        
         
         #compute time deltas
         timeDeltas = []
         for i in range(1,len(self.times)):
-            delta = self.times[i] - self.times[i-1]
+            delta = self.times[i] - self.times[i-1]  
             timeDeltas.append(delta)
         
         for i in range(0,len(timeDeltas)-1):
+            #pathString += str(self.times[i+1]) + ";"
             pathString += str(timeDeltas[i].total_seconds()) + ";"
             pathString += mapAbbrev[self.path[i+1]] + ";"
                 
@@ -87,3 +94,4 @@ class IndividualRecord:
             matrix[nodeIndex[mapAbbrev[self.path[i]]]][nodeIndex[mapAbbrev[self.path[i+1]]]] +=1
             
         return matrix
+    

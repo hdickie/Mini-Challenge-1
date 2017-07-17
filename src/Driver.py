@@ -6,13 +6,9 @@ Created on Fri Jun 02 17:58:25 2017
 """
 
 #Driver.py
+import IO
 
-from IO import writeIndividualRecords, writeCampsiteRecords, writeGroupHangouts, plotPath
-from IO import getIndividualRecords, getCampsiteRecords, getGroupHangouts
-
-#from IO import plotPath
-
-records = getIndividualRecords()
+#records = IO.getIndividualRecords()
 #writeIndividualRecords(records)
 
 #campRecs = getCampsiteRecords()
@@ -21,22 +17,13 @@ records = getIndividualRecords()
 #hangouts = getGroupHangouts()
 #writeGroupHangouts(hangouts)
 
-#for camp in hangouts:
-#    for line in hangouts[camp]:
-#        print str(line)
-            
-#weird car "20155705025759-63"
-# a ranger "20153722123707-242"
-plot = plotPath(records["20162823012818-280"][0])
+#inOut = getPopTimeSeries()
+#writePopTimeSeries(inOut)
 
-plot.show()
-#if this code isn't working then make sure config.py is right
+#plot = IO.plotPath(records["20150505020522-625"][0])
 
-#campRecs = pathsToCampRecords("abbrev-paths.txt")
+#plot.show()
 
-#os.chdir(outputDirectory)
-#recs = open("campRecords.txt",'w')
-#recs.write("car.id;beginTimestamp;gate.name;duration\n")
-#for rec in campRecs:
-#    recs.write(rec)
-#recs.close()
+#test = IO.getCampListForEachCar()
+#print test["20155401045441-227"]
+IO.writeMasterPlusClassification()

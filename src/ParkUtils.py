@@ -16,6 +16,23 @@ Created on Fri Jun 02 18:09:55 2017
 
 import re
 
+ignoreList = ["20155705025759-63", #the weird car
+
+              "20162904122951-717", #repeat camper: green
+              "20153712013720-181", #repeat camper: blue
+              "20154112014114-381", #repeat camper: orange
+              "20154519024544-322", #repeat camper: red
+              
+              "20162027042012-940", #at least 3 visits, at most 1 camp
+              
+              "20153427103455-30", #two visits, at most 1 camp
+              "20150322080300-861",
+              "20160623090611-424",
+              "20161008061012-639",
+              "20150204100226-134",
+              "20154501084537-684"
+              ]
+
 mapAbbrev = {"entrance0" : "E0",
              "entrance1" : "E1",
              "entrance2" : "E2",
